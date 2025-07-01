@@ -1,17 +1,6 @@
-type TimerMode = 'focus' | 'shortBreak' | 'longBreak';
+import type { TimerMode } from "$lib/types/timerMode";
 
-interface TimerState {
-   mode: TimerMode;
-   currentSession: number;
-   duration: {
-      focus: number;
-      shortBreak: number;
-      longBreak: number;
-   };
-}
-
-export const timer = $state<TimerState>({
-   mode: 'focus',
+export const timer = $state<{currentSession: number, duration: Record<TimerMode, number>}>({
    currentSession: 0,
    duration: {
       focus: 10,

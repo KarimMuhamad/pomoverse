@@ -5,70 +5,100 @@
   import { timer } from '$lib/state/Timer.svelte';
   import { formatTime } from '$lib/util/formatTime';
   import { fade } from 'svelte/transition';
+  import { sessionTitle, type TimerMode } from '$lib/types/timerMode';
+  import OverlayTimer from './OverlayTimer.svelte';
    
-	let activeTab = $state('focus');
+	let activeTab = $state<TimerMode>('focus');
+  let isStart = $state(false);
+  let isManual = $state(false);
+  let tick = $state(0);
+  
+  $effect(() => {
+    tick = timer.duration[activeTab];
+  });
 
-	const tabs = [
+	const tabs : {id: TimerMode, label : string}[] = [
 		{ id: 'focus', label: 'FOCUS' },
 		{ id: 'shortBreak', label: 'BREAK' },
 		{ id: 'longBreak', label: 'LONG BREAK' }
 	];
 
-	function setTab(tabId: string) {
+	const setTab = (tabId: TimerMode) => {
 		activeTab = tabId;
+    isManual = true;
+    tick = timer.duration[tabId];
 	}
 
-  let isStart = $state(false);
-  let tick: number = $derived.by(() => {
-    if (activeTab === 'focus') {
-      return timer.duration.focus;
-    } else if (activeTab === 'shortBreak') {
-      return timer.duration.shortBreak;
-    } else if (activeTab === 'longBreak') {
-      return timer.duration.longBreak;
+  const handleSkip = () => {
+    if (isManual) {
+      isManual = false;
+      activeTab = 'focus';
+      isStart = false;
+      return;
+    } else {
+      nextSession();
+      isStart = false;
     }
-    return 0;
-  });
 
-  const toggleStart = () => {
-    isStart = !isStart;
   }
-  
+
+  const nextSession = () => {
+    if (isManual) {
+      isManual = false;
+      activeTab = 'focus';
+      return;
+    }
+
+    timer.currentSession = (timer.currentSession + 1) % 8;
+    if (timer.currentSession === 7) {
+      activeTab = 'longBreak';
+      tick = timer.duration.longBreak;
+    } else if (timer.currentSession % 2 === 0) {
+      activeTab = 'focus';
+      tick = timer.duration.focus;
+    } else {
+      activeTab = 'shortBreak';
+      tick = timer.duration.shortBreak;
+    }
+  }
+
+  let interval: ReturnType<typeof setInterval>;
+
   const startTimer = () => {
-    const interval = setInterval(() => {
+    clearInterval(interval);
+    interval = setInterval(() => {
       tick -= 1;
       if (tick <= 0) {
-        if (activeTab === 'focus') {
-          activeTab = 'shortBreak';
-          tick = timer.duration.shortBreak;
-        } else if (activeTab === 'shortBreak') {
-          activeTab = 'longBreak';
-          tick = timer.duration.longBreak;
-        } else if (activeTab === 'longBreak') {
-          activeTab = 'focus';
-          tick = timer.duration.focus;
-        }
+        clearInterval(interval);
         isStart = false;
+        nextSession();
       }
+
       if (!isStart) {
         clearInterval(interval);
       }
     }, 1000);
   };
 
-  $effect(() => {
+  const toggleStart = () => {
+    isStart = !isStart;
     if (isStart) {
       startTimer();
+    } else {
+      clearInterval(interval);
     }
-  });
-
+  }
 </script>
+
+<svelte:head>
+  <title>{isStart ? `${activeTab} : ${formatTime(tick)} - Pomoverse` : 'Pomoverse'}</title>
+</svelte:head>
 
 <Card.Root class="w-full max-w-2xl mx-auto shadow-md">
   <Card.Header class="text-center">
-    <Card.Title class="font-bold text-2xl">ZERO DISTRACTION ZONE</Card.Title>
+    <Card.Title class="font-bold text-2xl">{sessionTitle[activeTab].title}</Card.Title>
     <Card.Description class="italic">
-      Close tabs, silence notifications, and dive in
+      {sessionTitle[activeTab].subtitle}
     </Card.Description>
   </Card.Header>
 
@@ -88,18 +118,14 @@
     </div>
 
     {#if isStart}
-      <div class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center backdrop-blur-md" transition:fade>
-        <div class="text-center space-y-8">
-          <div class="text-9xl text-white font-bold">{formatTime(tick)}</div>
-          <Button 
-            class="mx-auto text-white"
-            variant="destructive"
-            onclick={toggleStart}
-          >
-            STOP
-          </Button>
-        </div>
-      </div>
+      <OverlayTimer
+        tick={tick} 
+        onStop={toggleStart} 
+        title={sessionTitle[activeTab].title} 
+        subtitle={sessionTitle[activeTab].subtitle} 
+        max={timer.duration[activeTab]}
+        onNext={handleSkip}
+      />
     {:else}
       <div class="flex items-center justify-center">
         <div class="text-9xl font-semibold">{formatTime(tick)}</div>
@@ -110,6 +136,7 @@
   </Card.Content>
 
   <Card.Footer class="flex flex-col items-center justify-center space-y-4">
+    <p class="text-sm text-muted-foreground">#{Math.floor(timer.currentSession / 2) + 1}</p>
     <p class="text-sm italic text-muted-foreground">Start your first session by clicking the button below.</p>
     <Button class="w-full max-w-xs" onclick={toggleStart} variant={isStart ? 'destructive' : 'default'}>{isStart ? 'STOP' : 'START'}</Button>
   </Card.Footer>
