@@ -9,6 +9,7 @@
   import { sendNotification } from './utils/sendNotification';
   import { onDestroy, onMount } from 'svelte';
   import { Space } from '@lucide/svelte';
+  import * as Toltip from '$lib/components/ui/tooltip';
    
 	let activeTab = $state<TimerMode>('focus');
   let isStart = $state(false);
@@ -97,7 +98,6 @@
 
   onMount(() => {
     const handleKeydown = (event: KeyboardEvent) => {
-      console.log(event.key);
       if (event.key === ' ') {
         toggleStart();
       }

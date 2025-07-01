@@ -8,7 +8,7 @@ interface SessionTitle {
 export const sessionTitle: Record<TimerMode, SessionTitle> = {
    focus: {
     title: 'ZERO DISTRACTION ZONE',
-    subtitle: 'Close tabs, silence notifications, and dive in'
+    subtitle: 'Minimize tabs, silence notifications, and dive in'
    },
    shortBreak: {
       title: 'QUICK RECHARGE',
