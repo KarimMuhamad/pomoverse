@@ -20,7 +20,7 @@
 <div class="fixed w-full justify-around items-center bg-transparent backdrop-blur-md py-1.5 shadow-md">
    <div class="{cn('mx-auto transition-all duration-300', compact ? 'max-w-9/12' : 'max-w-7/12')}">
       <div class="flex items-center justify-between">
-         <a href="/" class="{cn(buttonVariants({variant: 'ghost', size: 'lg'}))} text-lg font-bold">POMOVERSE</a>
+         <a href="/" class="{cn(buttonVariants({variant: 'ghost', size: 'lg'}), 'text-lg font-bold')}">POMOVERSE</a>
          <a href="/" class="{cn(buttonVariants({ variant: 'ghost', size: 'lg' }))}">
             <ChartPie/>
             <span class="text-sm font-semibold">STATS</span>
@@ -44,6 +44,6 @@
    </div>
 </div>
 
-<div class="{cn('mx-auto pt-16 transition-all duration-300', compact ? 'max-w-9/12' : 'max-w-7/12')}">
+<div class="{cn('mx-auto pt-20 transition-all duration-300', compact ? 'max-w-9/12' : 'max-w-7/12')}">
    {@render children()}
 </div>

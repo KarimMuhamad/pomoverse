@@ -1,4 +1,6 @@
 <script lang="ts">
+	export const ssr = false;
+
 	import { ModeWatcher } from 'mode-watcher';
 	import '../app.css';
 	
