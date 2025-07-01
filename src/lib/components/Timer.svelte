@@ -4,9 +4,11 @@
   import Button from './ui/button/button.svelte';
   import { timer } from '$lib/state/Timer.svelte';
   import { formatTime } from '$lib/util/formatTime';
-  import { fade } from 'svelte/transition';
   import { sessionTitle, type TimerMode } from '$lib/types/timerMode';
   import OverlayTimer from './OverlayTimer.svelte';
+  import { sendNotification } from './utils/sendNotification';
+  import { onDestroy, onMount } from 'svelte';
+  import { Space } from '@lucide/svelte';
    
 	let activeTab = $state<TimerMode>('focus');
   let isStart = $state(false);
@@ -46,6 +48,8 @@
     if (isManual) {
       isManual = false;
       activeTab = 'focus';
+      tick = timer.duration.focus;
+      timer.currentSession = 0;
       return;
     }
 
@@ -60,6 +64,7 @@
       activeTab = 'shortBreak';
       tick = timer.duration.shortBreak;
     }
+
   }
 
   let interval: ReturnType<typeof setInterval>;
@@ -72,6 +77,7 @@
         clearInterval(interval);
         isStart = false;
         nextSession();
+        sendNotification(`Time's up!`, `Your session has ended.`);
       }
 
       if (!isStart) {
@@ -88,10 +94,25 @@
       clearInterval(interval);
     }
   }
+
+  onMount(() => {
+    const handleKeydown = (event: KeyboardEvent) => {
+      console.log(event.key);
+      if (event.key === ' ') {
+        toggleStart();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeydown);
+
+    onDestroy(() => {
+      window.removeEventListener('keydown', handleKeydown);
+    });
+  });
 </script>
 
 <svelte:head>
-  <title>{isStart ? `${activeTab} : ${formatTime(tick)} - Pomoverse` : 'Pomoverse'}</title>
+  <title>{isStart ? `${formatTime(tick)} - Pomoverse` : 'Pomoverse'}</title>
 </svelte:head>
 
 <Card.Root class="w-full max-w-2xl mx-auto shadow-md">
@@ -138,6 +159,6 @@
   <Card.Footer class="flex flex-col items-center justify-center space-y-4">
     <p class="text-sm text-muted-foreground">#{Math.floor(timer.currentSession / 2) + 1}</p>
     <p class="text-sm italic text-muted-foreground">Start your first session by clicking the button below.</p>
-    <Button class="w-full max-w-xs" onclick={toggleStart} variant={isStart ? 'destructive' : 'default'}>{isStart ? 'STOP' : 'START'}</Button>
+    <Button class="w-full max-w-xs" onclick={toggleStart} variant={isStart ? 'destructive' : 'default'}><Space/>{isStart ? 'STOP' : 'START'}</Button>
   </Card.Footer>
 </Card.Root>

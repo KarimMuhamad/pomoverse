@@ -4,6 +4,7 @@
    import Button from "./ui/button/button.svelte";
    import Progress from "./ui/progress/progress.svelte";
    import { SkipForward } from "@lucide/svelte";
+   import { Space } from "@lucide/svelte";
 
    let { max, tick, onStop, title, subtitle, onNext } = $props<{
       max: number, 
@@ -28,7 +29,7 @@
       <div class="flex flex-col items-center text-center space-y-8 mt-2">
          <div class="text-9xl text-white font-bold">{formatTime(tick)}</div>
          <div class="flex items-center justify-stretch space-x-1">
-            <Button variant="destructive" onclick={onStop}>STOP</Button>
+            <Button variant="destructive" onclick={onStop}><Space/>STOP</Button>
             <Button variant="ghost" onclick={onNext}><SkipForward/></Button>
          </div>
       </div>
