@@ -1,6 +1,6 @@
 <script lang="ts">
    import '../../app.css';
-   import { ChartPie, Settings2,SunIcon, MoonIcon, AlignHorizontalSpaceAround } from "@lucide/svelte";
+   import { ChartPie, Settings2,SunIcon, MoonIcon, AlignHorizontalSpaceAround, CircleUserRound } from "@lucide/svelte";
    import {Separator} from "$lib/components/ui/separator";
    import { cn } from '$lib/utils';
    import { buttonVariants } from '$lib/components/ui/button';
@@ -39,6 +39,8 @@
                />
                <span class="sr-only">Toggle theme</span>
             </Button>
+            <Separator orientation='vertical'/>
+            <a href="/login" class="{cn(buttonVariants({variant: 'ghost', size: 'lg'}))}"><CircleUserRound/>Sign In</a>
          </div>
       </div>
    </div>
