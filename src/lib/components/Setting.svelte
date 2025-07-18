@@ -19,6 +19,7 @@
       timer.duration.longBreak = longBreakTime * 60;
       timer.duration.shortBreak = shortBreakTime * 60;
       toast.success('Succes');
+      localStorage.setItem('timer-setting', JSON.stringify(timer));
    }
 </script>
 

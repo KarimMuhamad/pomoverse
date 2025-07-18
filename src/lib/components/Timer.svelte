@@ -14,9 +14,12 @@
   let isStart = $state(false);
   let isManual = $state(false);
   let tick = $state(0);
-  
+  let sessionNumber = $state(timer.currentSession);
+
   $effect(() => {
     tick = timer.duration[activeTab];
+    sessionNumber = Math.floor(timer.currentSession / 2) + 1;
+    $inspect(console.log(timer.currentSession, sessionNumber))
   });
 
 	const tabs : {id: TimerMode, label : string}[] = [
@@ -31,17 +34,35 @@
     tick = timer.duration[tabId];
 	}
 
+  const handleReset = () => {
+    isManual = false;
+    timer.currentSession = 0;
+    indexSelected(timer.currentSession);
+    localStorage.setItem('timer-setting', JSON.stringify(timer));
+  }
+
   const handleSkip = () => {
     if (isManual) {
       isManual = false;
-      activeTab = 'focus';
       isStart = false;
-      return;
+      indexSelected(timer.currentSession);
     } else {
       nextSession();
       isStart = false;
     }
+  }
 
+  const indexSelected = (index: number) => {
+    if (index === 7) {
+      activeTab = 'longBreak';
+      tick = timer.duration.longBreak;
+    } else if (index % 2 === 0) {
+      activeTab = 'focus';
+      tick = timer.duration.focus;
+    } else {
+      activeTab = 'shortBreak';
+      tick = timer.duration.shortBreak;
+    }
   }
 
   const nextSession = () => {
@@ -50,21 +71,13 @@
       activeTab = 'focus';
       tick = timer.duration.focus;
       timer.currentSession = 0;
+      localStorage.setItem('timer-setting', JSON.stringify(timer));
       return;
     }
 
     timer.currentSession = (timer.currentSession + 1) % 8;
-    if (timer.currentSession === 7) {
-      activeTab = 'longBreak';
-      tick = timer.duration.longBreak;
-    } else if (timer.currentSession % 2 === 0) {
-      activeTab = 'focus';
-      tick = timer.duration.focus;
-    } else {
-      activeTab = 'shortBreak';
-      tick = timer.duration.shortBreak;
-    }
-
+    localStorage.setItem('timer-setting', JSON.stringify(timer));
+    indexSelected(timer.currentSession);
   }
 
   let interval: ReturnType<typeof setInterval>;
@@ -72,17 +85,20 @@
   const startTimer = () => {
     clearInterval(interval);
     interval = setInterval(() => {
-      tick -= 1;
+      if (!isStart) {
+        clearInterval(interval);
+        return;
+      }
+
       if (tick <= 0) {
         clearInterval(interval);
         isStart = false;
         nextSession();
         sendNotification(`Time's up!`, `Your session has ended.`);
+        return;
       }
 
-      if (!isStart) {
-        clearInterval(interval);
-      }
+      tick -= 1;
     }, 1000);
   };
 
@@ -96,6 +112,8 @@
   }
 
   onMount(() => {
+    indexSelected(timer.currentSession);
+
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === ' ') {
         toggleStart();
@@ -156,7 +174,7 @@
   </Card.Content>
 
   <Card.Footer class="flex flex-col items-center justify-center space-y-4">
-    <p class="text-sm text-muted-foreground">#{Math.floor(timer.currentSession / 2) + 1}</p>
+    <Button class="text-sm text-muted-foreground" variant="ghost" onclick={handleReset}>#{sessionNumber}</Button>
     <p class="text-sm italic text-muted-foreground">Start your first session by clicking the button below.</p>
     <Button class="w-full max-w-xs" onclick={toggleStart} variant={isStart ? 'destructive' : 'default'}><Space/>{isStart ? 'STOP' : 'START'}</Button>
   </Card.Footer>
