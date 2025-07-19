@@ -6,14 +6,30 @@
    import { buttonVariants } from '$lib/components/ui/button';
    import Button from '$lib/components/ui/button/button.svelte';
    import { toggleMode } from 'mode-watcher';
+   import {onMount} from "svelte";
+   import {userGetRequest} from "$lib/api/userApi";
+   import Avatar from "$lib/components/Avatar.svelte";
 
    let { children } = $props();
 
    let compact = $state(false);
+   let user = $state<{} | null>(null);
 
    const handleCompactToggle = () => {
       compact = !compact;
    };
+
+   onMount(async () => {
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+         try {
+            const res = await userGetRequest(token);
+            user = res?.data;
+         } catch (e) {
+            console.log(e);
+         }
+      }
+   });
 
 </script>
 
@@ -40,7 +56,13 @@
                <span class="sr-only">Toggle theme</span>
             </Button>
             <Separator orientation='vertical'/>
-            <a href="/login" class="{cn(buttonVariants({variant: 'ghost', size: 'lg'}))}"><CircleUserRound/>Sign In</a>
+            {#if user }
+               <div class="mx-4">
+                  <Avatar name={user.username}/>
+               </div>
+            {:else }
+               <a href="/login" class="{cn(buttonVariants({variant: 'ghost', size: 'lg'}))}"><CircleUserRound/>Sign In</a>
+            {/if}
          </div>
       </div>
    </div>
