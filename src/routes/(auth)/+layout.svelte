@@ -1,5 +1,10 @@
 <script lang="ts">
   let { children } = $props();
+  import {goto} from "$app/navigation";
+
+  if (localStorage.getItem('accessToken')) {
+    goto('/');
+  }
 </script>
 
 <div class="min-w-full min-h-screen flex flex-col items-center justify-center">

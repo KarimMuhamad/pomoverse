@@ -38,10 +38,12 @@
    <div class="{cn('mx-auto transition-all duration-300', compact ? 'max-w-9/12' : 'max-w-7/12')}">
       <div class="flex items-center justify-between">
          <a href="/" class="{cn(buttonVariants({variant: 'ghost', size: 'lg'}), 'text-lg font-bold')}">POMOVERSE</a>
-         <a href="/statistic" class="{cn(buttonVariants({ variant: 'ghost', size: 'lg' }))}">
-            <ChartPie/>
-            <span class="text-sm font-semibold">STATS</span>
-         </a>
+         {#if userStore.user }
+            <a href="/statistic" class="{cn(buttonVariants({ variant: 'ghost', size: 'lg' }))}">
+               <ChartPie/>
+               <span class="text-sm font-semibold">STATS</span>
+            </a>
+         {/if}
          <div class="flex h-5 items-center space-x-0.5">
             <a href="/setting" class="{cn(buttonVariants({variant: 'ghost', size: 'lg'}))}"><Settings2/></a>
             <Separator orientation='vertical'/>

@@ -1,7 +1,6 @@
 <script lang="ts">
   import Setting from "$lib/components/Setting.svelte";
 
-   
 </script>
 
 <div class="w-full mx-auto">

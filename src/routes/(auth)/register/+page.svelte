@@ -33,6 +33,7 @@
       toast.error(e?.response?.data?.error || e?.message || "Something went wrong");
     }
   }
+
 </script>
 
 <Card.Root class="w-full max-w-sm">

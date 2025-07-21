@@ -3,8 +3,9 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import '../app.css';
   import { Toaster } from 'svelte-sonner';
-	
+
 	let { children } = $props();
+
 </script>
 
 <ModeWatcher/>
