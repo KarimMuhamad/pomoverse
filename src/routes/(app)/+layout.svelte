@@ -9,11 +9,12 @@
    import {onMount} from "svelte";
    import {userGetRequest} from "$lib/api/userApi";
    import Avatar from "$lib/components/Avatar.svelte";
+   import {UserStore} from "$lib/state/User.svelte";
 
    let { children } = $props();
 
    let compact = $state(false);
-   let user = $state<{} | null>(null);
+   const userStore = new UserStore();
 
    const handleCompactToggle = () => {
       compact = !compact;
@@ -24,7 +25,7 @@
       if (token) {
          try {
             const res = await userGetRequest(token);
-            user = res?.data;
+            userStore.user = res?.data;
          } catch (e) {
             console.log(e);
          }
@@ -56,9 +57,9 @@
                <span class="sr-only">Toggle theme</span>
             </Button>
             <Separator orientation='vertical'/>
-            {#if user }
+            {#if userStore.user }
                <div class="mx-4">
-                  <Avatar name={user.username}/>
+                  <Avatar name={userStore.user?.username}/>
                </div>
             {:else }
                <a href="/login" class="{cn(buttonVariants({variant: 'ghost', size: 'lg'}))}"><CircleUserRound/>Sign In</a>

@@ -1,8 +1,17 @@
-// interface User {
-//   email: string;
-//   id: number;
-//   username: string;
-// }
-//
-// export let user = $state<User | null>(null);
-// export let isLoggedIn = $state(false);
+interface User {
+  email: string;
+  id: number;
+  username: string;
+}
+
+export class UserStore {
+  #user: User | null = $state<User | null>(null);
+
+  set user(user: User | null) {
+    this.#user = user;
+  }
+
+  get user() {
+    return this.#user;
+  }
+}
