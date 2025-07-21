@@ -4,8 +4,14 @@
   import {getColorName, getInitial} from "$lib/util/getColorName";
   import {userLogoutRequest} from "$lib/api/userApi";
   import {toast} from "svelte-sonner";
+  import {mode} from "mode-watcher";
+  import {cn} from "$lib/utils";
+  import {buttonVariants} from "$lib/components/ui/button";
+  import {Settings2} from "@lucide/svelte";
 
   let { name } = $props();
+
+  let colorName = $derived(getColorName(name, mode.current as string));
 
   const handleLogout = async () => {
     try {
@@ -24,14 +30,13 @@
 <DropdownMenu.Root>
   <DropdownMenu.Trigger>
     <Avatar.Root>
-      <Avatar.Fallback style="background-color: {getColorName(name)}">{getInitial(name)}</Avatar.Fallback>
+      <Avatar.Fallback style="background-color: {colorName?.bgColor}; color: {colorName?.textColor} " class="font-semibold">{getInitial(name)}</Avatar.Fallback>
     </Avatar.Root>
   </DropdownMenu.Trigger>
   <DropdownMenu.Content>
     <DropdownMenu.Group>
       <DropdownMenu.Label>{name}</DropdownMenu.Label>
       <DropdownMenu.Separator />
-      <DropdownMenu.Item>Profile</DropdownMenu.Item>
       <DropdownMenu.Item onclick={handleLogout}>Log Out</DropdownMenu.Item>
     </DropdownMenu.Group>
   </DropdownMenu.Content>
