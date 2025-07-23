@@ -1,7 +1,8 @@
 <script lang="ts">
   import {goto} from "$app/navigation";
+  let { data } = $props();
 
-  if (!localStorage.getItem('accessToken')) {
+  if (data.user === null) {
     goto('/');
   }
 </script>

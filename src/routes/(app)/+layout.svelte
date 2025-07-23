@@ -6,31 +6,17 @@
    import { buttonVariants } from '$lib/components/ui/button';
    import Button from '$lib/components/ui/button/button.svelte';
    import { toggleMode } from 'mode-watcher';
-   import {onMount} from "svelte";
-   import {userGetRequest} from "$lib/api/userApi";
    import Avatar from "$lib/components/Avatar.svelte";
-   import {UserStore} from "$lib/state/User.svelte";
 
-   let { children } = $props();
+   let { children, data } = $props();
 
    let compact = $state(false);
-   const userStore = new UserStore();
 
    const handleCompactToggle = () => {
       compact = !compact;
    };
 
-   onMount(async () => {
-      const token = localStorage.getItem('accessToken');
-      if (token) {
-         try {
-            const res = await userGetRequest(token);
-            userStore.user = res?.data;
-         } catch (e) {
-            console.log(e);
-         }
-      }
-   });
+   const userLoad = data.user;
 
 </script>
 
@@ -38,7 +24,7 @@
    <div class="{cn('mx-auto transition-all duration-300', compact ? 'max-w-9/12' : 'max-w-7/12')}">
       <div class="flex items-center justify-between">
          <a href="/" class="{cn(buttonVariants({variant: 'ghost', size: 'lg'}), 'text-lg font-bold')}">POMOVERSE</a>
-         {#if userStore.user }
+         {#if userLoad }
             <a href="/statistic" class="{cn(buttonVariants({ variant: 'ghost', size: 'lg' }))}">
                <ChartPie/>
                <span class="text-sm font-semibold">STATS</span>
@@ -59,9 +45,9 @@
                <span class="sr-only">Toggle theme</span>
             </Button>
             <Separator orientation='vertical'/>
-            {#if userStore.user }
+            {#if userLoad }
                <div class="mx-4">
-                  <Avatar name={userStore.user?.username}/>
+                  <Avatar name={userLoad.username}/>
                </div>
             {:else }
                <a href="/login" class="{cn(buttonVariants({variant: 'ghost', size: 'lg'}))}"><CircleUserRound/>Sign In</a>

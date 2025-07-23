@@ -2,14 +2,16 @@
   import * as Card from '$lib/components/ui/card';
   import { cn } from '$lib/utils';
   import Button from './ui/button/button.svelte';
-  import { timer } from '$lib/state/Timer.svelte';
+  import { timerStore } from '$lib/state/Timer.svelte';
   import { formatTime } from '$lib/util/formatTime';
   import { sessionTitle, type TimerMode } from '$lib/types/timerMode';
   import OverlayTimer from './OverlayTimer.svelte';
   import { sendNotification } from './utils/sendNotification';
   import { onDestroy, onMount } from 'svelte';
   import { Space } from '@lucide/svelte';
-   
+
+  let timer = $state(timerStore.timer);
+
 	let activeTab = $state<TimerMode>('focus');
   let isStart = $state(false);
   let isManual = $state(false);
@@ -19,7 +21,6 @@
   $effect(() => {
     tick = timer.duration[activeTab];
     sessionNumber = Math.floor(timer.currentSession / 2) + 1;
-    $inspect(console.log(timer.currentSession, sessionNumber))
   });
 
 	const tabs : {id: TimerMode, label : string}[] = [

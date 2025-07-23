@@ -67,3 +67,23 @@ export const userLogoutRequest = async () => {
     throw e;
   }
 }
+
+export const getUserPreferencesRequest = async () => {
+  try {
+    const res = await axiosInstance.get('/users/preferences');
+    return res.data;
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+}
+
+export const getUserSetting = async () => {
+  try {
+    const res = await axiosInstance.get('/users/setting');
+    return res.data;
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+}

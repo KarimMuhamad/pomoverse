@@ -5,14 +5,37 @@ interface TimerState {
    duration: Record<TimerMode, number>;
 }
 
-const defaultTimer = $state<TimerState>({
-   currentSession: 0,
-   duration: {
-      focus: 60 * 25,
-      shortBreak: 60 * 5,
-      longBreak: 60 * 15
-   }
-});
+class TimerStore {
+   timer: TimerState = $state<TimerState>({
+      currentSession: 0,
+      duration: {
+         focus: 25 * 60,
+         shortBreak: 5 * 60,
+         longBreak: 15 * 60
+      }
+   });
 
-const stored = localStorage.getItem('timer-setting');
-export const timer = stored ? JSON.parse(stored) : defaultTimer;
+   constructor() {
+      this.loadFromLocalStorage();
+   }
+
+   updateDuration(update: Partial<TimerState>['duration']) {
+      this.timer.duration = {...this.timer.duration, ...update};
+      this.savedLocalStorage();
+   }
+
+   savedLocalStorage() {
+      localStorage.setItem('timer-setting', JSON.stringify(this.timer));
+   }
+
+   loadFromLocalStorage() {
+      const timerSetting = localStorage.getItem('timer-setting');
+      console.log(timerSetting);
+      if (timerSetting) {
+         const parsed: TimerState = JSON.parse(timerSetting);
+         this.timer = {...parsed};
+      }
+   }
+}
+
+export const timerStore = new TimerStore();

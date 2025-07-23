@@ -2,24 +2,28 @@
    import * as Card from '$lib/components/ui/card';
    import Button from './ui/button/button.svelte';
    import Input from './ui/input/input.svelte';
-   import { timer } from '$lib/state/Timer.svelte';
    import { toast } from 'svelte-sonner';
+   import {timerStore} from "$lib/state/Timer.svelte";
+   import {onMount} from "svelte";
 
    const secondToMinute = (sec : number) => {
       const result = Math.floor(sec / 60);
       return result;
    }
-   
-   let focusTime = secondToMinute(timer.duration.focus);
-   let shortBreakTime = secondToMinute(timer.duration.shortBreak);
-   let longBreakTime = secondToMinute(timer.duration.longBreak);
+
+   const timer = $state(timerStore.timer);
+
+   let focusTime = $state(secondToMinute(timer.duration.focus));
+   let shortBreakTime = $state(secondToMinute(timer.duration.shortBreak));
+   let longBreakTime = $state(secondToMinute(timer.duration.longBreak));
 
    const handleSave = () => {
-      timer.duration.focus = focusTime * 60;
-      timer.duration.longBreak = longBreakTime * 60;
-      timer.duration.shortBreak = shortBreakTime * 60;
-      toast.success('Succes');
-      localStorage.setItem('timer-setting', JSON.stringify(timer));
+      timerStore.updateDuration({
+         focus: focusTime * 60,
+         shortBreak: shortBreakTime * 60,
+         longBreak: longBreakTime * 60
+      });
+      toast.success("Success Saved Setting");
    }
 </script>
 
@@ -27,7 +31,7 @@
    <Card.Root>
       <Card.Header>
          <Card.Title>Pomodoro Setting</Card.Title>
-         <Card.Description>you can set your personal pomodor time</Card.Description>
+         <Card.Description>you can set your personal pomodoro</Card.Description>
          <Card.Action>
             <Button onclick={handleSave}>Save</Button>
          </Card.Action>
