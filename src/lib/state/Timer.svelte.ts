@@ -1,13 +1,11 @@
 import type { TimerMode } from "$lib/types/timerMode";
 
 interface TimerState {
-   currentSession: number;
    duration: Record<TimerMode, number>;
 }
 
 class TimerStore {
    timer: TimerState = $state<TimerState>({
-      currentSession: 0,
       duration: {
          focus: 25 * 60,
          shortBreak: 5 * 60,

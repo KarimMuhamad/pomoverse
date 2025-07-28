@@ -4,7 +4,7 @@
    import Input from './ui/input/input.svelte';
    import { toast } from 'svelte-sonner';
    import {timerStore} from "$lib/state/Timer.svelte";
-   import {onMount} from "svelte";
+   import {timerRuntimeStore} from "$lib/state/TimerRuntime.svelte";
 
    const secondToMinute = (sec : number) => {
       const result = Math.floor(sec / 60);
@@ -12,6 +12,7 @@
    }
 
    const timer = $state(timerStore.timer);
+   const runtimeTimer = $state(timerRuntimeStore);
 
    let focusTime = $state(secondToMinute(timer.duration.focus));
    let shortBreakTime = $state(secondToMinute(timer.duration.shortBreak));
@@ -23,6 +24,7 @@
          shortBreak: shortBreakTime * 60,
          longBreak: longBreakTime * 60
       });
+      runtimeTimer.reset();
       toast.success("Success Saved Setting");
    }
 </script>

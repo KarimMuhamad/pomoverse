@@ -9,19 +9,14 @@
   import { sendNotification } from './utils/sendNotification';
   import { onDestroy, onMount } from 'svelte';
   import { Space } from '@lucide/svelte';
+  import { timerRuntimeStore } from "$lib/state/TimerRuntime.svelte";
 
   let timer = $state(timerStore.timer);
+  let runtimeTimer = $state(timerRuntimeStore.runtimeTimer);
 
-	let activeTab = $state<TimerMode>('focus');
   let isStart = $state(false);
   let isManual = $state(false);
-  let tick = $state(0);
-  let sessionNumber = $state(timer.currentSession);
-
-  $effect(() => {
-    tick = timer.duration[activeTab];
-    sessionNumber = Math.floor(timer.currentSession / 2) + 1;
-  });
+  let sessionNumber = $derived.by(() => Math.floor(runtimeTimer.currentSession / 2) + 1);
 
 	const tabs : {id: TimerMode, label : string}[] = [
 		{ id: 'focus', label: 'FOCUS' },
@@ -30,23 +25,29 @@
 	];
 
 	const setTab = (tabId: TimerMode) => {
-		activeTab = tabId;
+    runtimeTimer.activeMode = tabId;
     isManual = true;
-    tick = timer.duration[tabId];
+    runtimeTimer.remainingTime = timer.duration[tabId];
+    runtimeTimer.currentSession = 0;
+    runtimeTimer.duration = 0;
+    timerRuntimeStore.savedLocalStorage();
 	}
 
   const handleReset = () => {
     isManual = false;
-    timer.currentSession = 0;
-    indexSelected(timer.currentSession);
-    localStorage.setItem('timer-setting', JSON.stringify(timer));
+    timerRuntimeStore.reset();
+    indexSelected(runtimeTimer.currentSession);
   }
 
   const handleSkip = () => {
     if (isManual) {
       isManual = false;
       isStart = false;
-      indexSelected(timer.currentSession);
+      runtimeTimer.remainingTime = 0;
+      runtimeTimer.currentSession = 0;
+      runtimeTimer.duration = 0;
+      indexSelected(runtimeTimer.currentSession);
+      timerRuntimeStore.savedLocalStorage();
     } else {
       nextSession();
       isStart = false;
@@ -55,30 +56,32 @@
 
   const indexSelected = (index: number) => {
     if (index === 7) {
-      activeTab = 'longBreak';
-      tick = timer.duration.longBreak;
+      runtimeTimer.activeMode = 'longBreak';
+      runtimeTimer.remainingTime = timer.duration.longBreak;
     } else if (index % 2 === 0) {
-      activeTab = 'focus';
-      tick = timer.duration.focus;
+      runtimeTimer.activeMode = 'focus';
+      runtimeTimer.remainingTime = timer.duration.focus;
     } else {
-      activeTab = 'shortBreak';
-      tick = timer.duration.shortBreak;
+      runtimeTimer.activeMode = 'shortBreak';
+      runtimeTimer.remainingTime = timer.duration.shortBreak;
     }
   }
 
   const nextSession = () => {
     if (isManual) {
       isManual = false;
-      activeTab = 'focus';
-      tick = timer.duration.focus;
-      timer.currentSession = 0;
-      localStorage.setItem('timer-setting', JSON.stringify(timer));
+      runtimeTimer.activeMode = 'focus';
+      runtimeTimer.remainingTime = timer.duration.focus;
+      runtimeTimer.currentSession = 0;
+      runtimeTimer.duration = 0;
+      timerRuntimeStore.savedLocalStorage();
       return;
     }
 
-    timer.currentSession = (timer.currentSession + 1) % 8;
-    localStorage.setItem('timer-setting', JSON.stringify(timer));
-    indexSelected(timer.currentSession);
+    runtimeTimer.currentSession = (runtimeTimer.currentSession + 1) % 8;
+    runtimeTimer.duration = 0;
+    indexSelected(runtimeTimer.currentSession);
+    timerRuntimeStore.savedLocalStorage();
   }
 
   let interval: ReturnType<typeof setInterval>;
@@ -91,7 +94,7 @@
         return;
       }
 
-      if (tick <= 0) {
+      if (runtimeTimer.remainingTime <= 0) {
         clearInterval(interval);
         isStart = false;
         nextSession();
@@ -99,7 +102,9 @@
         return;
       }
 
-      tick -= 1;
+      runtimeTimer.remainingTime -= 1;
+      runtimeTimer.duration += 1;
+      timerRuntimeStore.savedLocalStorage();
     }, 1000);
   };
 
@@ -113,8 +118,6 @@
   }
 
   onMount(() => {
-    indexSelected(timer.currentSession);
-
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === ' ') {
         toggleStart();
@@ -130,14 +133,14 @@
 </script>
 
 <svelte:head>
-  <title>{isStart ? `${formatTime(tick)} - Pomoverse` : 'Pomoverse'}</title>
+  <title>{isStart ? `${formatTime(runtimeTimer.remainingTime)} - Pomoverse` : 'Pomoverse'}</title>
 </svelte:head>
 
 <Card.Root class="w-full max-w-2xl mx-auto shadow-md">
   <Card.Header class="text-center">
-    <Card.Title class="font-bold text-2xl">{sessionTitle[activeTab].title}</Card.Title>
+    <Card.Title class="font-bold text-2xl">{sessionTitle[runtimeTimer.activeMode].title}</Card.Title>
     <Card.Description class="italic">
-      {sessionTitle[activeTab].subtitle}
+      {sessionTitle[runtimeTimer.activeMode].subtitle}
     </Card.Description>
   </Card.Header>
 
@@ -146,9 +149,9 @@
       {#each tabs as tab}
         <Button
           class="min-w-1/3 py-2 rounded-full {cn(
-            activeTab === tab.id ? '' : 'text-muted-foreground'
+            runtimeTimer.activeMode === tab.id ? '' : 'text-muted-foreground'
           )}"
-          variant={activeTab === tab.id ? 'default' : 'ghost'}
+          variant={runtimeTimer.activeMode === tab.id ? 'default' : 'ghost'}
           onclick={() => setTab(tab.id)}
         >
           {tab.label}
@@ -158,16 +161,16 @@
 
     {#if isStart}
       <OverlayTimer
-        tick={tick} 
+        tick={runtimeTimer.remainingTime}
         onStop={toggleStart} 
-        title={sessionTitle[activeTab].title} 
-        subtitle={sessionTitle[activeTab].subtitle} 
-        max={timer.duration[activeTab]}
+        title={sessionTitle[runtimeTimer.activeMode].title}
+        subtitle={sessionTitle[runtimeTimer.activeMode].subtitle}
+        max={timer.duration[runtimeTimer.activeMode]}
         onNext={handleSkip}
       />
     {:else}
       <div class="flex items-center justify-center">
-        <div class="text-9xl font-semibold">{formatTime(tick)}</div>
+        <div class="text-9xl font-semibold">{formatTime(runtimeTimer.remainingTime)}</div>
       </div>
     {/if}
 

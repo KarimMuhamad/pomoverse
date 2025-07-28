@@ -4,7 +4,7 @@ interface User {
   username: string;
 }
 
-export class UserStore {
+class UserStore {
   #user: User | null = $state<User | null>(null);
 
   set user(user: User | null) {
@@ -15,3 +15,5 @@ export class UserStore {
     return this.#user;
   }
 }
+
+export const userStore = new UserStore();
