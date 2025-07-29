@@ -1,10 +1,10 @@
-import {getAllLabelsRequest} from "$lib/api/labelApi";
+import {addLabelRequest, getAllLabelsRequest} from "$lib/api/labelApi";
 
 interface Label {
-  id: number;
+  id?: number;
   name: string;
   color: string;
-  isDefault: boolean;
+  isDefault?: boolean;
 }
 
 class LabelStore {
@@ -14,9 +14,8 @@ class LabelStore {
   async init() {
     try {
       const res = await getAllLabelsRequest();
-      this.labels = res?.data;
-      console.log(res);
-      console.log(this.labels);
+      // this.label = res?.data[0];
+      this.labels.push(...res?.data);
     } catch (e) {
       console.log(e);
     }
@@ -32,6 +31,16 @@ class LabelStore {
 
   setLabels(labels: Label[]) {
     this.labels = labels;
+  }
+
+  async addLabel(label: Label) {
+    try {
+      const res = await addLabelRequest(label);
+      console.log(res);
+      this.labels.push(res?.data);
+    } catch (e) {
+      console.log(e);
+    }
   }
 }
 
