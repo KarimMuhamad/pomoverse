@@ -7,6 +7,8 @@
   import { toast } from 'svelte-sonner';
   import {goto} from "$app/navigation";
   import {userLoginRequest} from "$lib/api/userApi";
+  import {timerStore} from "$lib/state/Timer.svelte";
+  import {timerRuntimeStore} from "$lib/state/TimerRuntime.svelte";
 
   let login = $state({
     email: "",
@@ -18,7 +20,9 @@
     try {
       const res = await userLoginRequest(login);
       localStorage.setItem('accessToken', res?.accessToken);
-      toast.success("Login Success")
+      toast.success("Login Success");
+      await timerStore.loadFromApi();
+      timerRuntimeStore.reset();
       await goto('/');
     } catch (e) {
       console.log(e);

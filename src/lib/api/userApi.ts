@@ -6,6 +6,12 @@ interface RegisterRequest {
   password: string;
 }
 
+interface UpdatePreferencesRequest {
+  focusDuration: number;
+  shortBreakDuration: number;
+  longBreakDuration: number;
+}
+
 export const refreshTokenRequest = async () => {
   try {
     const res = await axiosInstance.post('/auth/refresh', {}, {
@@ -71,6 +77,16 @@ export const userLogoutRequest = async () => {
 export const getUserPreferencesRequest = async () => {
   try {
     const res = await axiosInstance.get('/users/preferences');
+    return res.data;
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+}
+
+export const updatePreferencesRequest = async (payload: UpdatePreferencesRequest) => {
+  try {
+    const res = await axiosInstance.patch('/users/preferences', payload);
     return res.data;
   } catch (e) {
     console.log(e);

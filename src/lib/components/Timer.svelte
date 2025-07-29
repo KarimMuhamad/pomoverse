@@ -124,6 +124,10 @@
       }
     };
 
+    if (localStorage.getItem('accessToken')) {
+      timerStore.loadFromApi();
+    }
+
     window.addEventListener('keydown', handleKeydown);
 
     onDestroy(() => {

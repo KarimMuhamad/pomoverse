@@ -1,4 +1,5 @@
 import type { TimerMode } from "$lib/types/timerMode";
+import {getUserPreferencesRequest, updatePreferencesRequest} from "$lib/api/userApi";
 
 interface TimerState {
    duration: Record<TimerMode, number>;
@@ -28,10 +29,47 @@ class TimerStore {
 
    loadFromLocalStorage() {
       const timerSetting = localStorage.getItem('timer-setting');
-      console.log(timerSetting);
       if (timerSetting) {
          const parsed: TimerState = JSON.parse(timerSetting);
          this.timer = {...parsed};
+      }
+   }
+
+   async loadFromApi() {
+      try {
+         const res = await getUserPreferencesRequest();
+         this.timer.duration = this.mappingFromApi(res?.data);
+         console.log(res);
+         this.savedLocalStorage();
+      } catch (e) {
+         console.log(e);
+         this.loadFromLocalStorage();
+      }
+   }
+
+   mappingFromApi(data: any) {
+      return {
+         focus: data.focusDuration,
+         shortBreak: data.shortBreakDuration,
+         longBreak: data.longBreakDuration
+      }
+   }
+
+   mappingToApi(data: TimerState['duration']) {
+      return {
+         focusDuration: data.focus,
+         shortBreakDuration: data.shortBreak,
+         longBreakDuration: data.longBreak
+      }
+   }
+
+   async updatePreferencesApi() {
+      try {
+         const payload = this.mappingToApi(this.timer.duration);
+         const res = await updatePreferencesRequest(payload);
+         console.log(res);
+      } catch (e) {
+         console.log(e);
       }
    }
 }

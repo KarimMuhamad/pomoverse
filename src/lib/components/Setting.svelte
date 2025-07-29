@@ -24,6 +24,11 @@
          shortBreak: shortBreakTime * 60,
          longBreak: longBreakTime * 60
       });
+
+      if (localStorage.getItem('accessToken')) {
+         timerStore.updatePreferencesApi();
+      }
+
       runtimeTimer.reset();
       toast.success("Success Saved Setting");
    }

@@ -5,9 +5,9 @@
   import {userLogoutRequest} from "$lib/api/userApi";
   import {toast} from "svelte-sonner";
   import {mode} from "mode-watcher";
-  import {cn} from "$lib/utils";
-  import {buttonVariants} from "$lib/components/ui/button";
-  import {Settings2} from "@lucide/svelte";
+  import {timerRuntimeStore} from "$lib/state/TimerRuntime.svelte";
+  import {goto} from "$app/navigation";
+
 
   let { name } = $props();
 
@@ -16,9 +16,10 @@
   const handleLogout = async () => {
     try {
       const res = await userLogoutRequest();
-      console.log(res);
       toast.success("Succesfully Logout");
       localStorage.removeItem('accessToken');
+      localStorage.removeItem('timer-setting');
+      localStorage.removeItem('timer-runtime');
       window.location.reload();
     } catch (e) {
       console.log(e);
