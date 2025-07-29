@@ -5,9 +5,6 @@
   import {userLogoutRequest} from "$lib/api/userApi";
   import {toast} from "svelte-sonner";
   import {mode} from "mode-watcher";
-  import {timerRuntimeStore} from "$lib/state/TimerRuntime.svelte";
-  import {goto} from "$app/navigation";
-
 
   let { name } = $props();
 
