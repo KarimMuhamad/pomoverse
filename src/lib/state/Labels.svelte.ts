@@ -14,8 +14,21 @@ class LabelStore {
   async init() {
     try {
       const res = await getAllLabelsRequest();
-      this.label = res?.data[0];
       this.labels.push(...res?.data);
+
+      const timerRuntime = localStorage.getItem('timer-runtime');
+      if (timerRuntime) {
+        const runtimeObj = JSON.parse(timerRuntime);
+        if (runtimeObj.labelId) {
+          const foundLabel = this.labels.find(label => label.id === runtimeObj.labelId);
+          if (foundLabel) {
+            this.setLabel(foundLabel);
+            return;
+          }
+        }
+      }
+
+      this.setLabel(this.labels[0]);
     } catch (e) {
       console.log(e);
     }

@@ -2,6 +2,8 @@ import type {TimerMode} from "$lib/types/timerMode";
 import {timerStore} from "$lib/state/Timer.svelte";
 
 interface TimerRuntimeState {
+  isRunning: boolean;
+  labelId?: number | null;
   currentSession: number;
   duration: number;
   activeMode: TimerMode;
@@ -10,6 +12,7 @@ interface TimerRuntimeState {
 
 class TimerRuntimeStore {
   runtimeTimer: TimerRuntimeState = $state<TimerRuntimeState>({
+    isRunning: false,
     currentSession: 0,
     duration: 0,
     activeMode: 'focus',
@@ -34,6 +37,7 @@ class TimerRuntimeStore {
 
   reset() {
     this.runtimeTimer = {
+      isRunning: false,
       currentSession: 0,
       duration: 0,
       activeMode: 'focus',

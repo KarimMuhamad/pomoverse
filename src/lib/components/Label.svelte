@@ -8,6 +8,9 @@
   import AddLabelDialog from "$lib/components/AddLabelDialog.svelte";
   import DeleteLabelDialog from "$lib/components/DeleteLabelDialog.svelte";
   import EditLabelDrawer from "$lib/components/EditLabelDrawer.svelte";
+  import {timerRuntimeStore} from "$lib/state/TimerRuntime.svelte";
+
+  let runtimeTimer = timerRuntimeStore.runtimeTimer;
 
   onMount(() => {
      labelStore.init();
@@ -24,20 +27,36 @@
   </Card.Header>
   <Card.Content class="flex flex-wrap justify-center space-x-2 space-y-2">
 {#each labelStore.labels as label}
-  <Badge
-    onclick={() => labelStore.setLabel(label)}
-    style={labelStore.label?.id === label.id
-     ? `background-color: ${label.color}; filter: drop-shadow(0 4px 8px ${label.color}40)` : `background-color: ${label.color};`}
-    class={`h-8 cursor-pointer transition-all ${labelStore.label?.id === label.id
-     ? !label.isDefault ? 'ring-1 ring-primary pr-0' : 'ring-1 ring-primary'
-     : 'hover:ring-1 hover:ring-primary'}`}
-  >
-    {label.name}
-    {#if labelStore.label?.id === label.id && !label.isDefault}
-      <EditLabelDrawer id={label.id} name={label.name} color={label.color} />
-      <DeleteLabelDialog idLabel={label.id}/>
-    {/if}
-  </Badge>
+<Badge
+  onclick={() => {
+    if (runtimeTimer.isRunning) return;
+    labelStore.setLabel(label);
+  }}
+  style={labelStore.label?.id === label.id
+    ? `background-color: ${label.color}; filter: drop-shadow(0 8px 12px ${label.color}40)`
+    : runtimeTimer.isRunning
+      ? 'background-color: #00000070;'
+      : `background-color: ${label.color};`
+  }
+  class={`h-8 transition-all
+    ${runtimeTimer.isRunning
+      ? 'cursor-not-allowed'
+      : 'cursor-pointer'
+    }
+    ${labelStore.label?.id === label.id 
+      ? !label.isDefault && !runtimeTimer.isRunning
+        ? 'ring-1 ring-primary'
+        : 'ring-1 ring-primary'
+      : ''
+    }
+  `}
+>
+  {label.name}
+  {#if labelStore.label?.id === label.id && !label.isDefault && !runtimeTimer.isRunning}
+    <EditLabelDrawer id={label.id} name={label.name} color={label.color} />
+    <DeleteLabelDialog idLabel={label.id}/>
+  {/if}
+</Badge>
 {/each}
   </Card.Content>
   <Card.Footer class="flex flex-col justify-center">

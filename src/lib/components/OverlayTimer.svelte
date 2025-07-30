@@ -6,13 +6,13 @@
    import { SkipForward } from "@lucide/svelte";
    import { Space } from "@lucide/svelte";
 
-   let { max, tick, onStop, title, subtitle, onNext } = $props<{
+   let { max, tick, onStop, title, subtitle, onNext} = $props<{
       max: number, 
       tick:number, 
       onStop: () => void, 
       title: string, 
       subtitle: string,
-      onNext: () => void
+      onNext: () => void,
    }>(); 
 
    const getProgressPercent = (remaining: number, total: number): number => {
@@ -25,7 +25,7 @@
    <div class="flex flex-col max-w-7/2 items-center justify-center">
       <p class="text-3xl text-white font-bold">{title}</p>
       <p class="italic text-sm text-muted-foreground font-semibold mb-2">{subtitle}</p>
-      <Progress value={getProgressPercent(tick, max)} max={100} />
+      <Progress value={getProgressPercent(tick, max)} max={100}/>
       <div class="flex flex-col items-center text-center space-y-8 mt-2">
          <div class="text-9xl text-white font-bold">{formatTime(tick)}</div>
          <div class="flex items-center justify-stretch space-x-1">

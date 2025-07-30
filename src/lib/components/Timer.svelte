@@ -10,6 +10,7 @@
   import { onDestroy, onMount } from 'svelte';
   import { Space } from '@lucide/svelte';
   import { timerRuntimeStore } from "$lib/state/TimerRuntime.svelte";
+  import {labelStore} from "$lib/state/Labels.svelte";
 
   let timer = $state(timerStore.timer);
   let runtimeTimer = $state(timerRuntimeStore.runtimeTimer);
@@ -27,6 +28,7 @@
 	const setTab = (tabId: TimerMode) => {
     runtimeTimer.activeMode = tabId;
     isManual = true;
+    runtimeTimer.isRunning = false;
     runtimeTimer.remainingTime = timer.duration[tabId];
     runtimeTimer.currentSession = 0;
     runtimeTimer.duration = 0;
@@ -35,6 +37,7 @@
 
   const handleReset = () => {
     isManual = false;
+    runtimeTimer.isRunning = false;
     timerRuntimeStore.reset();
     indexSelected(runtimeTimer.currentSession);
   }
@@ -43,12 +46,14 @@
     if (isManual) {
       isManual = false;
       isStart = false;
+      runtimeTimer.isRunning = false;
       runtimeTimer.remainingTime = 0;
       runtimeTimer.currentSession = 0;
       runtimeTimer.duration = 0;
       indexSelected(runtimeTimer.currentSession);
       timerRuntimeStore.savedLocalStorage();
     } else {
+      runtimeTimer.isRunning = false;
       nextSession();
       isStart = false;
     }
@@ -95,6 +100,7 @@
       }
 
       if (runtimeTimer.remainingTime <= 0) {
+        runtimeTimer.isRunning = false;
         clearInterval(interval);
         isStart = false;
         nextSession();
@@ -111,6 +117,9 @@
   const toggleStart = () => {
     isStart = !isStart;
     if (isStart) {
+      runtimeTimer.isRunning = true;
+      runtimeTimer.labelId = labelStore.label?.id;
+      timerRuntimeStore.savedLocalStorage();
       startTimer();
     } else {
       clearInterval(interval);
