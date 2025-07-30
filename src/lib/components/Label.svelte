@@ -6,15 +6,7 @@
   import {onMount} from "svelte";
   import {labelStore} from "$lib/state/Labels.svelte";
   import AddLabelDialog from "$lib/components/AddLabelDialog.svelte";
-
-  let selectedLabel = $state(labelStore.labels[0]);
-  $inspect(console.log(selectedLabel));
-  let labels = $state(labelStore.labels);
-
-  const handleSelect = (label: any) => {
-    // labelStore.setLabel(label);
-    selectedLabel = label;
-  }
+  import DeleteLabelDialog from "$lib/components/DeleteLabelDialog.svelte";
 
   onMount(() => {
      labelStore.init();
@@ -30,34 +22,24 @@
     </Card.Action>
   </Card.Header>
   <Card.Content class="flex flex-wrap justify-center space-x-2 space-y-2">
-    {#each labels as label}
-      <Badge
-        onclick={() => handleSelect(label)}
-        style={
-          selectedLabel?.id === label.id
-            ? `background-color: ${label.color}; filter: drop-shadow(0 4px 8px ${label.color}50)`
-            : `background-color: ${label.color};`
-          }
-          class={`h-8 rounded-full cursor-pointer transition-all ${
-            selectedLabel?.id === label.id
-            ? 'text-white ring-1 ring-primary'
-            : 'bg-muted text-muted hover:bg-muted/70'
-          }`}
-      >
-
-      {label.name}
-        {#if selectedLabel?.id === label.id && label.isDefault === false}
-          <Button size="icon" variant="ghost">
-            <Pencil/>
-          </Button>
-          <Button size="icon" variant="ghost">
-            <Delete/>
-          </Button>
-        {/if}
-      </Badge>
-    {/each}
+{#each labelStore.labels as label}
+  <Badge
+    onclick={() => labelStore.setLabel(label)}
+    style={labelStore.label?.id === label.id
+     ? `background-color: ${label.color}; filter: drop-shadow(0 4px 8px ${label.color}40)` : `background-color: ${label.color};`}
+    class={`h-8 cursor-pointer transition-all ${labelStore.label?.id === label.id
+     ? !label.isDefault ? 'ring-1 ring-primary pr-0' : 'ring-1 ring-primary'
+     : 'hover:ring-1 hover:ring-primary'}`}
+  >
+    {label.name}
+    {#if labelStore.label?.id === label.id && !label.isDefault}
+      <Button size="icon" variant="ghost"><Pencil /></Button>
+      <DeleteLabelDialog idLabel={label.id}/>
+    {/if}
+  </Badge>
+{/each}
   </Card.Content>
-<!--  <Card.Footer class="flex flex-col justify-center">-->
-<!--    <Button>Add Label</Button>-->
-<!--  </Card.Footer>-->
+  <Card.Footer class="flex flex-col justify-center">
+    <Card.Description class="text-sm italic">Default Label is Unlabelled</Card.Description>
+  </Card.Footer>
 </Card.Root>

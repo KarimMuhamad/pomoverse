@@ -19,3 +19,13 @@ export const addLabelRequest = async (payload: any) => {
     throw e;
   }
 }
+
+export const deleteLabelRequest = async (id: number) => {
+  try {
+    const res = await axiosInstance.delete('/labels/' + id);
+    return res.data;
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+}
