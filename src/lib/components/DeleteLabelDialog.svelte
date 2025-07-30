@@ -10,6 +10,7 @@
 
   const deleteLabel = () => {
     labelStore.deleteLabel(idLabel);
+    labelStore.label = labelStore.labels[0];
     toast.success('Success Deleted Label');
   }
 </script>

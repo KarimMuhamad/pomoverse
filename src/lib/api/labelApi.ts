@@ -29,3 +29,13 @@ export const deleteLabelRequest = async (id: number) => {
     throw e;
   }
 }
+
+export const editLabelRequest = async (id: number, payload: any) => {
+  try {
+    const res = await axiosInstance.patch('/labels/' + id, payload);
+    return res.data;
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+}

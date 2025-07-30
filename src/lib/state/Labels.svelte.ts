@@ -1,4 +1,4 @@
-import {addLabelRequest, deleteLabelRequest, getAllLabelsRequest} from "$lib/api/labelApi";
+import {addLabelRequest, deleteLabelRequest, editLabelRequest, getAllLabelsRequest} from "$lib/api/labelApi";
 
 interface Label {
   id?: number;
@@ -48,6 +48,15 @@ class LabelStore {
       const res = await deleteLabelRequest(id);
       console.log(res);
       this.labels = this.labels.filter(label => label.id !== id);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  async editLabel(id: number, label: Label) {
+    try {
+      const res = await editLabelRequest(id, label);
+      this.labels = this.labels.map(l => l.id === id ? res?.data : l);
     } catch (e) {
       console.log(e);
     }

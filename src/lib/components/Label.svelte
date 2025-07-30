@@ -7,6 +7,7 @@
   import {labelStore} from "$lib/state/Labels.svelte";
   import AddLabelDialog from "$lib/components/AddLabelDialog.svelte";
   import DeleteLabelDialog from "$lib/components/DeleteLabelDialog.svelte";
+  import EditLabelDrawer from "$lib/components/EditLabelDrawer.svelte";
 
   onMount(() => {
      labelStore.init();
@@ -33,7 +34,7 @@
   >
     {label.name}
     {#if labelStore.label?.id === label.id && !label.isDefault}
-      <Button size="icon" variant="ghost"><Pencil /></Button>
+      <EditLabelDrawer id={label.id} name={label.name} color={label.color} />
       <DeleteLabelDialog idLabel={label.id}/>
     {/if}
   </Badge>
