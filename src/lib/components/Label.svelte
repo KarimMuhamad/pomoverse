@@ -10,8 +10,6 @@
   import EditLabelDrawer from "$lib/components/EditLabelDrawer.svelte";
   import {timerRuntimeStore} from "$lib/state/TimerRuntime.svelte";
 
-  let runtimeTimer = timerRuntimeStore.runtimeTimer;
-
   onMount(() => {
      labelStore.init();
   });
@@ -29,22 +27,22 @@
 {#each labelStore.labels as label}
 <Badge
   onclick={() => {
-    if (runtimeTimer.isRunning) return;
+    if (timerRuntimeStore.runtimeTimer.isRunning) return;
     labelStore.setLabel(label);
   }}
   style={labelStore.label?.id === label.id
     ? `background-color: ${label.color}; filter: drop-shadow(0 8px 12px ${label.color}40)`
-    : runtimeTimer.isRunning
+    : timerRuntimeStore.runtimeTimer.isRunning
       ? 'background-color: #00000070;'
       : `background-color: ${label.color};`
   }
   class={`h-8 transition-all
-    ${runtimeTimer.isRunning
+    ${timerRuntimeStore.runtimeTimer.isRunning
       ? 'cursor-not-allowed'
       : 'cursor-pointer'
     }
     ${labelStore.label?.id === label.id 
-      ? !label.isDefault && !runtimeTimer.isRunning
+      ? !label.isDefault && !timerRuntimeStore.runtimeTimer.isRunning
         ? 'ring-1 ring-primary'
         : 'ring-1 ring-primary'
       : ''
@@ -52,7 +50,7 @@
   `}
 >
   {label.name}
-  {#if labelStore.label?.id === label.id && !label.isDefault && !runtimeTimer.isRunning}
+  {#if labelStore.label?.id === label.id && !label.isDefault && !timerRuntimeStore.runtimeTimer.isRunning}
     <EditLabelDrawer id={label.id} name={label.name} color={label.color} />
     <DeleteLabelDialog idLabel={label.id}/>
   {/if}
@@ -60,6 +58,10 @@
 {/each}
   </Card.Content>
   <Card.Footer class="flex flex-col justify-center">
-    <Card.Description class="text-sm italic">Default Label is Unlabelled</Card.Description>
+    {#if timerRuntimeStore.runtimeTimer.isRunning}
+      <Card.Description class="text-sm italic"># Not Allowed to change if session was started, finish it!!!</Card.Description>
+    {:else}
+      <Card.Description class="text-sm italic"># Default Label is Unlabelled</Card.Description>
+    {/if}
   </Card.Footer>
 </Card.Root>

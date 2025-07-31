@@ -9,8 +9,8 @@ class TimerStore {
    timer: TimerState = $state<TimerState>({
       duration: {
          focus: 25 * 60,
-         shortBreak: 5 * 60,
-         longBreak: 15 * 60
+         short_Break: 5 * 60,
+         long_Break: 15 * 60
       }
    });
 
@@ -50,16 +50,16 @@ class TimerStore {
    mappingFromApi(data: any) {
       return {
          focus: data.focusDuration,
-         shortBreak: data.shortBreakDuration,
-         longBreak: data.longBreakDuration
+         short_Break: data.shortBreakDuration,
+         long_Break: data.longBreakDuration
       }
    }
 
    mappingToApi(data: TimerState['duration']) {
       return {
          focusDuration: data.focus,
-         shortBreakDuration: data.shortBreak,
-         longBreakDuration: data.longBreak
+         shortBreakDuration: data.short_Break,
+         longBreakDuration: data.long_Break
       }
    }
 

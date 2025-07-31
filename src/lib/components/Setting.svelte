@@ -15,14 +15,14 @@
    const runtimeTimer = $state(timerRuntimeStore);
 
    let focusTime = $state(secondToMinute(timer.duration.focus));
-   let shortBreakTime = $state(secondToMinute(timer.duration.shortBreak));
-   let longBreakTime = $state(secondToMinute(timer.duration.longBreak));
+   let shortBreakTime = $state(secondToMinute(timer.duration.short_Break));
+   let longBreakTime = $state(secondToMinute(timer.duration.long_Break));
 
    const handleSave = () => {
       timerStore.updateDuration({
          focus: focusTime * 60,
-         shortBreak: shortBreakTime * 60,
-         longBreak: longBreakTime * 60
+         short_Break: shortBreakTime * 60,
+         long_Break: longBreakTime * 60
       });
 
       if (localStorage.getItem('accessToken')) {

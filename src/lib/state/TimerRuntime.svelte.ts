@@ -1,9 +1,12 @@
 import type {TimerMode} from "$lib/types/timerMode";
 import {timerStore} from "$lib/state/Timer.svelte";
+import {createSessionRequest, type SessionRequestPayload, updateSessionRequest} from "$lib/api/sessionApi";
+import {userStore} from "$lib/state/User.svelte";
 
 interface TimerRuntimeState {
   isRunning: boolean;
   labelId?: number | null;
+  sessionId?: number | null;
   currentSession: number;
   duration: number;
   activeMode: TimerMode;
@@ -35,8 +38,37 @@ class TimerRuntimeStore {
     }
   }
 
+  async sendSessionToApi(payload: SessionRequestPayload) {
+    if(!localStorage.getItem('accessToken')) return;
+
+    try {
+      const res = await createSessionRequest(payload);
+      console.log(res);
+      this.runtimeTimer.sessionId = res?.data.id;
+      this.savedLocalStorage();
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  async sendUpdateSessionToApi(id: number ,payload: SessionRequestPayload) {
+    if(!localStorage.getItem('accessToken')) return;
+
+    if(!this.runtimeTimer.sessionId) {
+      return;
+    }
+
+    try {
+      console.log(id);
+      const res = await updateSessionRequest(id, payload);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   reset() {
     this.runtimeTimer = {
+      sessionId: null,
       isRunning: false,
       currentSession: 0,
       duration: 0,

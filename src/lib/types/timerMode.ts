@@ -1,4 +1,4 @@
-export type TimerMode = 'focus' | 'shortBreak' | 'longBreak';
+export type TimerMode = 'focus' | 'short_Break' | 'long_Break';
 
 interface SessionTitle {
    title: string;
@@ -10,11 +10,11 @@ export const sessionTitle: Record<TimerMode, SessionTitle> = {
     title: 'ZERO DISTRACTION ZONE',
     subtitle: 'Minimize tabs, silence notifications, and dive in'
    },
-   shortBreak: {
+   short_Break: {
       title: 'QUICK RECHARGE',
       subtitle: 'Stay away from your screen and take a deep breath'
    },
-   longBreak: {
+   long_Break: {
       title: 'FULL REBOOT',
       subtitle: 'Do a quick stretch, walk, or hydrate. Your body will thank you!'
    }

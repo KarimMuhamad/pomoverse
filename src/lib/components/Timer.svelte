@@ -11,49 +11,53 @@
   import { Space } from '@lucide/svelte';
   import { timerRuntimeStore } from "$lib/state/TimerRuntime.svelte";
   import {labelStore} from "$lib/state/Labels.svelte";
-
-  let timer = $state(timerStore.timer);
-  let runtimeTimer = $state(timerRuntimeStore.runtimeTimer);
+  import type {SessionRequestPayload} from "$lib/api/sessionApi";
 
   let isStart = $state(false);
   let isManual = $state(false);
-  let sessionNumber = $derived.by(() => Math.floor(runtimeTimer.currentSession / 2) + 1);
+  let sessionNumber = $derived.by(() => Math.floor(timerRuntimeStore.runtimeTimer.currentSession / 2) + 1);
 
 	const tabs : {id: TimerMode, label : string}[] = [
 		{ id: 'focus', label: 'FOCUS' },
-		{ id: 'shortBreak', label: 'BREAK' },
-		{ id: 'longBreak', label: 'LONG BREAK' }
+		{ id: 'short_Break', label: 'BREAK' },
+		{ id: 'long_Break', label: 'LONG BREAK' }
 	];
 
 	const setTab = (tabId: TimerMode) => {
-    runtimeTimer.activeMode = tabId;
+    timerRuntimeStore.runtimeTimer.activeMode = tabId;
     isManual = true;
-    runtimeTimer.isRunning = false;
-    runtimeTimer.remainingTime = timer.duration[tabId];
-    runtimeTimer.currentSession = 0;
-    runtimeTimer.duration = 0;
+    timerRuntimeStore.runtimeTimer.isRunning = false;
+    timerRuntimeStore.runtimeTimer.remainingTime = timerStore.timer.duration[tabId];
+    timerRuntimeStore.runtimeTimer.currentSession = 0;
+    timerRuntimeStore.runtimeTimer.duration = 0;
+    timerRuntimeStore.runtimeTimer.sessionId = null;
+    console.log('sessionId Deleted setTab');
     timerRuntimeStore.savedLocalStorage();
 	}
 
   const handleReset = () => {
     isManual = false;
-    runtimeTimer.isRunning = false;
     timerRuntimeStore.reset();
-    indexSelected(runtimeTimer.currentSession);
+    console.log('sessionId Deleted handleReset');
+    indexSelected(timerRuntimeStore.runtimeTimer.currentSession);
   }
 
   const handleSkip = () => {
     if (isManual) {
       isManual = false;
       isStart = false;
-      runtimeTimer.isRunning = false;
-      runtimeTimer.remainingTime = 0;
-      runtimeTimer.currentSession = 0;
-      runtimeTimer.duration = 0;
-      indexSelected(runtimeTimer.currentSession);
+      handleUpdateSessionToApi(false);
+      timerRuntimeStore.runtimeTimer.isRunning = false;
+      timerRuntimeStore.runtimeTimer.remainingTime = 0;
+      timerRuntimeStore.runtimeTimer.currentSession = 0;
+      timerRuntimeStore.runtimeTimer.duration = 0;
+      timerRuntimeStore.runtimeTimer.sessionId = null;
+      console.log('sessionId Deleted handleSkip manual = true');
+      indexSelected(timerRuntimeStore.runtimeTimer.currentSession);
       timerRuntimeStore.savedLocalStorage();
     } else {
-      runtimeTimer.isRunning = false;
+      handleUpdateSessionToApi(false);
+      timerRuntimeStore.runtimeTimer.isRunning = false;
       nextSession();
       isStart = false;
     }
@@ -61,31 +65,35 @@
 
   const indexSelected = (index: number) => {
     if (index === 7) {
-      runtimeTimer.activeMode = 'longBreak';
-      runtimeTimer.remainingTime = timer.duration.longBreak;
+      timerRuntimeStore.runtimeTimer.activeMode = 'long_Break';
+      timerRuntimeStore.runtimeTimer.remainingTime = timerStore.timer.duration.long_Break;
     } else if (index % 2 === 0) {
-      runtimeTimer.activeMode = 'focus';
-      runtimeTimer.remainingTime = timer.duration.focus;
+      timerRuntimeStore.runtimeTimer.activeMode = 'focus';
+      timerRuntimeStore.runtimeTimer.remainingTime = timerStore.timer.duration.focus;
     } else {
-      runtimeTimer.activeMode = 'shortBreak';
-      runtimeTimer.remainingTime = timer.duration.shortBreak;
+      timerRuntimeStore.runtimeTimer.activeMode = 'short_Break';
+      timerRuntimeStore.runtimeTimer.remainingTime = timerStore.timer.duration.short_Break;
     }
   }
 
   const nextSession = () => {
     if (isManual) {
       isManual = false;
-      runtimeTimer.activeMode = 'focus';
-      runtimeTimer.remainingTime = timer.duration.focus;
-      runtimeTimer.currentSession = 0;
-      runtimeTimer.duration = 0;
+      timerRuntimeStore.runtimeTimer.activeMode = 'focus';
+      timerRuntimeStore.runtimeTimer.remainingTime = timerStore.timer.duration.focus;
+      timerRuntimeStore.runtimeTimer.currentSession = 0;
+      timerRuntimeStore.runtimeTimer.duration = 0;
+      timerRuntimeStore.runtimeTimer.sessionId = null;
+      console.log('sessionId Deleted nextSession manual = true');
       timerRuntimeStore.savedLocalStorage();
       return;
     }
 
-    runtimeTimer.currentSession = (runtimeTimer.currentSession + 1) % 8;
-    runtimeTimer.duration = 0;
-    indexSelected(runtimeTimer.currentSession);
+    timerRuntimeStore.runtimeTimer.currentSession = (timerRuntimeStore.runtimeTimer.currentSession + 1) % 8;
+    timerRuntimeStore.runtimeTimer.duration = 0;
+    timerRuntimeStore.runtimeTimer.sessionId = null;
+    console.log('sessionId Deleted nextSession manual = false');
+    indexSelected(timerRuntimeStore.runtimeTimer.currentSession);
     timerRuntimeStore.savedLocalStorage();
   }
 
@@ -99,8 +107,9 @@
         return;
       }
 
-      if (runtimeTimer.remainingTime <= 0) {
-        runtimeTimer.isRunning = false;
+      if (timerRuntimeStore.runtimeTimer.remainingTime <= 0) {
+        handleUpdateSessionToApi(true);
+        timerRuntimeStore.runtimeTimer.isRunning = false;
         clearInterval(interval);
         isStart = false;
         nextSession();
@@ -108,20 +117,49 @@
         return;
       }
 
-      runtimeTimer.remainingTime -= 1;
-      runtimeTimer.duration += 1;
+      timerRuntimeStore.runtimeTimer.remainingTime -= 1;
+      timerRuntimeStore.runtimeTimer.duration += 1;
       timerRuntimeStore.savedLocalStorage();
     }, 1000);
   };
 
-  const toggleStart = () => {
+  const handleCreateSessionToApi = async () => {
+    const payload: SessionRequestPayload = {
+      labelId: timerRuntimeStore.runtimeTimer.labelId ?? null,
+      duration: timerRuntimeStore.runtimeTimer.duration,
+      hour: new Date().getHours(),
+      type: timerRuntimeStore.runtimeTimer.activeMode.toUpperCase(),
+      isCompleted: false
+    }
+
+    await timerRuntimeStore.sendSessionToApi(payload);
+  }
+
+  const handleUpdateSessionToApi = (completed: boolean) => {
+    const payload: SessionRequestPayload = {
+      labelId: timerRuntimeStore.runtimeTimer.labelId ?? null,
+      duration: timerRuntimeStore.runtimeTimer.duration,
+      hour: new Date().getHours(),
+      type: timerRuntimeStore.runtimeTimer.activeMode.toUpperCase(),
+      isCompleted: completed
+    }
+
+    timerRuntimeStore.sendUpdateSessionToApi(timerRuntimeStore.runtimeTimer.sessionId!, payload);
+  }
+
+  const toggleStart = async () => {
     isStart = !isStart;
     if (isStart) {
-      runtimeTimer.isRunning = true;
-      runtimeTimer.labelId = labelStore.label?.id;
-      timerRuntimeStore.savedLocalStorage();
+      timerRuntimeStore.runtimeTimer.isRunning = true;
+      timerRuntimeStore.runtimeTimer.labelId = labelStore.label?.id;
+
+      if (!timerRuntimeStore.runtimeTimer.sessionId) {
+        await handleCreateSessionToApi();
+      }
+
       startTimer();
     } else {
+      handleUpdateSessionToApi(false);
       clearInterval(interval);
     }
   }
@@ -146,14 +184,14 @@
 </script>
 
 <svelte:head>
-  <title>{isStart ? `${formatTime(runtimeTimer.remainingTime)} - Pomoverse` : 'Pomoverse'}</title>
+  <title>{isStart ? `${formatTime(timerRuntimeStore.runtimeTimer.remainingTime)} - Pomoverse` : 'Pomoverse'}</title>
 </svelte:head>
 
 <Card.Root class="w-full max-w-2xl mx-auto shadow-md">
   <Card.Header class="text-center">
-    <Card.Title class="font-bold text-2xl">{sessionTitle[runtimeTimer.activeMode].title}</Card.Title>
+    <Card.Title class="font-bold text-2xl">{sessionTitle[timerRuntimeStore.runtimeTimer.activeMode].title}</Card.Title>
     <Card.Description class="italic">
-      {sessionTitle[runtimeTimer.activeMode].subtitle}
+      {sessionTitle[timerRuntimeStore.runtimeTimer.activeMode].subtitle}
     </Card.Description>
   </Card.Header>
 
@@ -162,9 +200,9 @@
       {#each tabs as tab}
         <Button
           class="min-w-1/3 py-2 rounded-full {cn(
-            runtimeTimer.activeMode === tab.id ? '' : 'text-muted-foreground'
+            timerRuntimeStore.runtimeTimer.activeMode === tab.id ? '' : 'text-muted-foreground'
           )}"
-          variant={runtimeTimer.activeMode === tab.id ? 'default' : 'ghost'}
+          variant={timerRuntimeStore.runtimeTimer.activeMode === tab.id ? 'default' : 'ghost'}
           onclick={() => setTab(tab.id)}
         >
           {tab.label}
@@ -174,20 +212,18 @@
 
     {#if isStart}
       <OverlayTimer
-        tick={runtimeTimer.remainingTime}
+        tick={timerRuntimeStore.runtimeTimer.remainingTime}
         onStop={toggleStart} 
-        title={sessionTitle[runtimeTimer.activeMode].title}
-        subtitle={sessionTitle[runtimeTimer.activeMode].subtitle}
-        max={timer.duration[runtimeTimer.activeMode]}
+        title={sessionTitle[timerRuntimeStore.runtimeTimer.activeMode].title}
+        subtitle={sessionTitle[timerRuntimeStore.runtimeTimer.activeMode].subtitle}
+        max={timerStore.timer.duration[timerRuntimeStore.runtimeTimer.activeMode]}
         onNext={handleSkip}
       />
     {:else}
       <div class="flex items-center justify-center">
-        <div class="text-9xl font-semibold">{formatTime(runtimeTimer.remainingTime)}</div>
+        <div class="text-9xl font-semibold">{formatTime(timerRuntimeStore.runtimeTimer.remainingTime)}</div>
       </div>
     {/if}
-
-    
   </Card.Content>
 
   <Card.Footer class="flex flex-col items-center justify-center space-y-4">
