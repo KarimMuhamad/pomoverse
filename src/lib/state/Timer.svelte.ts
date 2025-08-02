@@ -39,7 +39,6 @@ class TimerStore {
       try {
          const res = await getUserPreferencesRequest();
          this.timer.duration = this.mappingFromApi(res?.data);
-         console.log(res);
          this.savedLocalStorage();
       } catch (e) {
          console.log(e);

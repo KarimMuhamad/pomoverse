@@ -5,15 +5,7 @@ interface User {
 }
 
 class UserStore {
-  #user: User | null = $state<User | null>(null);
-
-  set user(user: User | null) {
-    this.#user = user;
-  }
-
-  get user() {
-    return this.#user;
-  }
+  user: User | null = $state<User | null>(null);
 }
 
 export const userStore = new UserStore();

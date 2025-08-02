@@ -12,6 +12,8 @@ class LabelStore {
   labels = $state<Label[]>([]);
 
   async init() {
+    if(this.labels.length > 0) return;
+
     try {
       const res = await getAllLabelsRequest();
       this.labels.push(...res?.data);

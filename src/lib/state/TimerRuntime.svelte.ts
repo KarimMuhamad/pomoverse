@@ -43,7 +43,6 @@ class TimerRuntimeStore {
 
     try {
       const res = await createSessionRequest(payload);
-      console.log(res);
       this.runtimeTimer.sessionId = res?.data.id;
       this.savedLocalStorage();
     } catch (e) {
@@ -59,7 +58,6 @@ class TimerRuntimeStore {
     }
 
     try {
-      console.log(id);
       const res = await updateSessionRequest(id, payload);
     } catch (e) {
       console.log(e);

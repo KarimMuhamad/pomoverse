@@ -43,8 +43,8 @@
     }
     ${labelStore.label?.id === label.id 
       ? !label.isDefault && !timerRuntimeStore.runtimeTimer.isRunning
-        ? 'ring-1 ring-primary'
-        : 'ring-1 ring-primary'
+        ? 'ring-1 ring-primary pr-0'
+        : ''
       : ''
     }
   `}
