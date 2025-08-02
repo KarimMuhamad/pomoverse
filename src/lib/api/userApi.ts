@@ -2,8 +2,8 @@ import axiosInstance from "$lib/api/axiosInstance";
 
 interface RegisterRequest {
   username?: string;
-  email: string;
-  password: string;
+  email?: string;
+  password?: string;
 }
 
 interface UpdatePreferencesRequest {
@@ -97,6 +97,16 @@ export const updatePreferencesRequest = async (payload: UpdatePreferencesRequest
 export const getUserSetting = async () => {
   try {
     const res = await axiosInstance.get('/users/setting');
+    return res.data;
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+}
+
+export const updateProfileRequest = async (payload: RegisterRequest) => {
+  try {
+    const res = await axiosInstance.patch('/users/me', payload);
     return res.data;
   } catch (e) {
     console.log(e);

@@ -15,9 +15,10 @@
       return result;
    }
 
-   let name = $state(userStore.user!.username);
-   let email = $state(userStore.user!.email);
+   let name = $state(userStore.user?.username ?? "");
+   let email = $state(userStore.user?.email ?? "");
    let password = $state('');
+   let passwordConfirmation = $state('');
    let colorName = $derived(getColorName(name, mode.current as string));
 
    const timer = $state(timerStore.timer);
@@ -40,6 +41,32 @@
 
       runtimeTimer.reset();
       toast.success("Success Saved Setting");
+   }
+
+   let handleUpdateProfile = async () => {
+      const payload: any = {};
+
+      if(name && name !== userStore.user!.username) payload.username = name;
+      if(email && email !== userStore.user!.email) payload.email = email;
+
+      if (password != passwordConfirmation) {
+         toast.error("Confirmation password wrong");
+         return;
+      }
+
+      if(password) payload.password = password;
+
+      if(Object.keys(payload).length === 0) {
+         toast.error('No Changes to updates');
+         return;
+      }
+
+      try {
+         await userStore.updateUser(payload);
+         toast.success('Success Update Profile');
+      } catch (e) {
+         toast.error('Error update profile');
+      }
    }
 </script>
 
@@ -70,12 +97,13 @@
       </Card.Content>
    </Card.Root>
 
+   {#if userStore.user != null}
    <Card.Root>
       <Card.Header>
          <Card.Title>User Profile Setting</Card.Title>
          <Card.Description>you can set your personal information</Card.Description>
          <Card.Action>
-            <Button>Save</Button>
+            <Button onclick={handleUpdateProfile}>Save</Button>
          </Card.Action>
       </Card.Header>
       <Card.Content>
@@ -98,10 +126,15 @@
                <Input type="email" placeholder="User@gmail.com" bind:value={email}/>
             </div>
             <div class="flex items-center justify-between">
-               <label for="pomodoro-time" class="min-w-9/12 font-semibold">Password</label>
+               <label for="pomodoro-time" class="min-w-9/12 font-semibold">New Password</label>
                <Input type="password" placeholder="Password" bind:value={password}/>
+            </div>
+            <div class="flex items-center justify-between">
+               <label for="pomodoro-time" class="min-w-9/12 font-semibold">Confirm Password</label>
+               <Input type="password" placeholder="Confirmation Password" bind:value={passwordConfirmation}/>
             </div>
          </div>
       </Card.Content>
    </Card.Root>
+   {/if}
 </div>
