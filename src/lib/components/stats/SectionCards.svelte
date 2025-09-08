@@ -1,6 +1,6 @@
 <script lang="ts">
-  import * as Card from "$lib/components/ui/card/index.js";
-  import { Badge } from "$lib/components/ui/badge/index.js";
+  import * as Card from "$lib/components/ui/card";
+  import { Badge } from "$lib/components/ui/badge";
   import { TrendingUp, TrendingDown, Minus, Flame, Trophy } from '@lucide/svelte';
 </script>
 
@@ -60,7 +60,7 @@
     <Card.Header>
       <Card.Title class="font-semibold">Consistency</Card.Title>
       <Card.Action>
-        <Badge variant="secondary" class="bg-amber-600">
+        <Badge variant="secondary" class="bg-amber-600 text-white">
           <Flame class="h-4 w-4"/> 5x
         </Badge>
       </Card.Action>
